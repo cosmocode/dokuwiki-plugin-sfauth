@@ -1,0 +1,43 @@
+====== SF Auth ======
+
+===== Setup =====
+
+To install this plug-in you have to do the following steps in the given order:
+  - Install this plugin.
+  - Do the "Setup at SalesForce" steps
+  - Do the "DokuWiki Setup" steps
+
+==== Setup at SalesForce ====
+
+=== Remote Access ===
+  - Login
+  - Click on your name in the top toolbar
+  - Click on ''Setup''
+  - Choose ''Develop'' from the left hand navigation
+  - Click ''Remote Access''
+  - Click ''New''
+  - Fill Form
+    * use the https://example.com/dokuwiki/doku.php?do=login&u=a
+  - Configure the plugin in the configuration manager using the data given
+
+=== Add custom profile Field ===
+  - Login
+  - Click on your name in the top toolbar
+  - Click on ''Setup''
+  - Click on ''Customize'' in the ''App Setup'' section
+  - Click on ''Users''
+  - Click on ''Fields''
+  - Click on ''new'' in the ''User Custom Fields'' section (page bottom)
+    - Step 1:
+      * Picklist (Multi-Select)
+    - Step 2:
+      * Fill out form
+      * Field Name: DokuWiki_Groups
+    - Step 3:
+      * Choose editor, may grand the user read only access.
+    - Step 4:
+      * Save
+
+==== DokuWiki Setup ====
+  - copy the lib/plugins/sfauth/sfauth.class.php to inc/auth/sfauth.class.php
+  - change the authtype config to sfauth.
