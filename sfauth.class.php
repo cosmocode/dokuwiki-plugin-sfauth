@@ -72,11 +72,14 @@ class auth_sfauth extends auth_plain {
             if ($this->oauth_finish($_GET['code'])) {
                 $resp = $this->apicall('GET', '/chatter/users/me');
                 $user = $resp['id'];
+                $this->user = $user;
                 $resp = $this->apicall('GET', '/sobjects/User/' . rawurlencode($user));
                 $this->parseUserData($resp);
 
-                msg('Authentication successful', 1);
-                return true;
+                if ($this->save_auth()) {
+                    msg('Authentication successful', 1);
+                    return true;
+                }
             }
             msg('Oops! something went wrong.', -1);
             return false;
@@ -107,11 +110,10 @@ class auth_sfauth extends auth_plain {
         $json = new JSON(JSON_LOOSE_TYPE);
         $resp = $json->decode($resp);
 
-
         $this->user = $resp['id'];
         $this->auth = $resp;
 
-        return $this->save_auth();
+        return true;
     }
 
     /**
@@ -176,6 +178,9 @@ class auth_sfauth extends auth_plain {
      * Execute an API call with the current author
      */
     public function apicall($method,$endpoint,$data=array(),$usejson=true){
+        if ($this->user === '') {
+            $this->user = $_SERVER['REMOTE_USER'];
+        }
         if(!$this->load_auth()) return false;
 
         $json = new JSON(JSON_LOOSE_TYPE);
