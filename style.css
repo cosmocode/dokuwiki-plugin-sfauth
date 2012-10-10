@@ -1,3 +1,24 @@
 .sfauth {
     margin-top: 1em;
+    text-align: center;
+    line-height: 12pt;
+}
+
+.page .sfauth a.sf,
+#icke__wrapper .content .sfauth a.sf {
+    display: inline-block;
+    background-color: #356FB6;
+    color: #fff;
+    padding: 1em;
+    font-size: 10pt;
+    font-weight: bold;
+    border: 0;
+}
+
+.sfauth a.sf:link, a.sf:visited, a.sf:active, a.sf:hover
+#icke__wrapper .content .sfauth a.sf:link,
+#icke__wrapper .content .sfauth a.sf:visited,
+#icke__wrapper .content .sfauth a.sf:active,
+#icke__wrapper .content .sfauth a.sf:hover {
+    color: #fff;
 }
