@@ -17,7 +17,7 @@ To install this plug-in you have to do the following steps in the given order:
   - Click ''Remote Access''
   - Click ''New''
   - Fill Form
-    * use the https://example.com/dokuwiki/doku.php?do=login&u=a
+    * use the https://example.com/dokuwiki/doku.php?do=login&u=a as callback url
   - Configure the plugin in the configuration manager using the data given
 
 === Add custom profile Field ===
