@@ -18,7 +18,9 @@ require_once DOKU_PLUGIN.'action.php';
 class action_plugin_sfauth extends DokuWiki_Action_Plugin {
 
     public function register(Doku_Event_Handler &$controller) {
-       $controller->register_hook('HTML_LOGINFORM_OUTPUT', 'AFTER', $this, 'handle_html_loginform_output');
+        $controller->register_hook('HTML_LOGINFORM_OUTPUT', 'AFTER', $this, 'handle_html_loginform_output');
+        $controller->register_hook('ACTION_HEADERS_SEND', 'AFTER', $this, 'handle_login');
+
         if ($this->getConf('show login')) {
             $controller->register_hook('TPL_CONTENT_DISPLAY', 'AFTER', $this, 'append_to_content');
         }
@@ -51,6 +53,15 @@ class action_plugin_sfauth extends DokuWiki_Action_Plugin {
         }
 
         $this->displayLogin(true);
+    }
+
+    public function handle_login(Doku_Event &$event, $param) {
+        global $ID;
+        if (!isset($_GET['code'])) {
+            return;
+        }
+
+        send_redirect(wl($ID, '', true, '&'));
     }
 }
 
