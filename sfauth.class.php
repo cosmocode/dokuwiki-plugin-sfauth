@@ -48,18 +48,34 @@ class auth_sfauth extends auth_plain {
             return $this->salesForceUsers[$user];
         }
 
-        $resp = $this->apicall('GET', '/chatter/users/' . rawurlencode($user));
-        if (!$resp) return false;
-        return $this->parseUserData($resp);
+        return false;
     }
 
     private function parseUserData($data) {
-        $this->salesForceUsers[$data['Id']] = array(
+        $id = $this->transformMailToId($data['Email']);
+        $this->salesForceUsers[$id] = array(
             'name' => $data['Name'],
             'mail' => $data['Email'],
-            'grps' => explode(';', $data['DokuWiki_Groups__c'])
+            'grps' => explode(';', $data['DokuWiki_Groups__c']),
+            'sfid' => $data['Id']
         );
-        return $this->salesForceUsers[$data['id']];
+        return $this->salesForceUsers[$id];
+    }
+
+    public function transformMailToId($mail) {
+        if (!strpos($mail, '@')) {
+            return $mail;
+        }
+        global $conf;
+        $ownerDomain = $conf['plugin']['sfauth']['owner domain'];
+
+        if (empty($ownerDomain)) {
+            return $mail;
+        }
+
+        $newMail = preg_replace('/' . preg_quote('@' . $ownerDomain, '/') . '$/i', '', $mail);
+
+        return $newMail;
     }
 
     function checkPass(&$user, $pass) {
@@ -71,9 +87,10 @@ class auth_sfauth extends auth_plain {
         if ($_GET['code']) {
             if ($this->oauth_finish($_GET['code'])) {
                 $resp = $this->apicall('GET', '/chatter/users/me');
-                $user = $resp['id'];
+                $id = $resp['id'];
+                $user = $this->transformMailToId($resp['email']);
                 $this->user = $user;
-                $resp = $this->apicall('GET', '/sobjects/User/' . rawurlencode($user));
+                $resp = $this->apicall('GET', '/sobjects/User/' . rawurlencode($id));
                 $this->parseUserData($resp);
 
                 if ($this->save_auth()) {
@@ -87,8 +104,6 @@ class auth_sfauth extends auth_plain {
         $this->oauth_start();
         return false;
     }
-
-
 
     public function oauth_finish($code){
         global $conf;

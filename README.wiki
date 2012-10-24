@@ -41,3 +41,9 @@ To install this plug-in you have to do the following steps in the given order:
 ==== DokuWiki Setup ====
   - copy the lib/plugins/sfauth/sfauth.class.php to inc/auth/sfauth.class.php
   - change the authtype config to sfauth.
+
+==== Owners domain ====
+As username the plug-in will use the e-mail address provided by sales force.
+In some cases you may want to strip away the host part from the e-mail address to have
+nice names. To provide a unique username this feature is limited to one host.
+Just set the //owners domain// option to your domain. I.e.: example.com.
