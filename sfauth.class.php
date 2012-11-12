@@ -84,6 +84,24 @@ class auth_sfauth extends auth_plain {
         }
         if (!$this->checkConfiguration()) return false;
 
+        if ($_GET['user'] && $_GET['sessionId']) {
+            if ($this->oauth_finish_session($_GET['user'], $_GET['sessionId'], $_GET['instance'])) {
+                $resp = $this->apicall('GET', '/chatter/users/me');
+                $id = $resp['id'];
+                $user = $this->transformMailToId($resp['email']);
+                $this->user = $user;
+                $resp = $this->apicall('GET', '/sobjects/User/' . rawurlencode($id));
+                $this->parseUserData($resp);
+
+                if ($this->save_auth()) {
+                    msg('Authentication successful', 1);
+                    return true;
+                }
+            }
+            msg('Oops! something went wrong.1', -1);
+            return false;
+        }
+
         if ($_GET['code']) {
             if ($this->oauth_finish($_GET['code'])) {
                 $resp = $this->apicall('GET', '/chatter/users/me');
@@ -124,12 +142,26 @@ class auth_sfauth extends auth_plain {
 
         $json = new JSON(JSON_LOOSE_TYPE);
         $resp = $json->decode($resp);
+        $resp['access_token'] = 'OAuth '.$resp['access_token'];
 
         $this->user = $resp['id'];
         $this->auth = $resp;
 
         return true;
     }
+
+    public function oauth_finish_session($user, $sessionId, $instance){
+        $url = parse_url($instance);
+        $this->auth = array(
+            'instance_url' => sprintf('%s://%s', $url['scheme'], $url['host']),
+            'access_token' => 'Bearer ' . $sessionId
+        );
+
+        $this->user = $user;
+
+        return true;
+    }
+
 
     /**
      * Initialize the OAuth process
@@ -167,6 +199,9 @@ class auth_sfauth extends auth_plain {
     public function oauth_refresh(){
         global $conf;
         if(!$this->load_auth()) return false;
+        if (!isset($this->auth['refresh_token'])) {
+            return false;
+        }
         $data = array(
             'grant_type'    => 'refresh_token',
             'refresh_token' => $this->auth['refresh_token'],
@@ -202,7 +237,7 @@ class auth_sfauth extends auth_plain {
         $url   = $this->auth['instance_url'].'/services/data/v24.0'.$endpoint;
 
         $http = new DokuHTTPClient();
-        $http->headers['Authorization'] = 'OAuth '.$this->auth['access_token'];
+        $http->headers['Authorization'] = $this->auth['access_token'];
         $http->headers['Accept']        = 'application/json';
         $http->headers['X-PrettyPrint'] = '1';
 
