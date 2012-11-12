@@ -57,4 +57,4 @@ Just create the web tab:
     - fill out the forms important field is: ''Button or Link URL''
 
 URL for ''Link URL''
-  https://your.wiki/path/doku.php?do=login&u=a&sessionId={!API_Session_ID}&instance={!API_Enterprise_Server_URL_240}&user={!User_ID}&q={!API_Partner_Server_URL_240}
+  https://your.wiki/path/doku.php?do=login&u=a&sessionId={!API_Session_ID}&instance={!API_Enterprise_Server_URL_240}&user={!User_ID}
