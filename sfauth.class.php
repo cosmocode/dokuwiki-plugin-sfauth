@@ -256,8 +256,8 @@ class auth_sfauth extends auth_plain {
         }
 
         $http->sendRequest($url, $data, $method);
-        dbglog('call' . print_r($http, true), 'sfauth');
         if(!$http->resp_body) {
+            dbglog('err call' . print_r($http, true), 'sfauth');
             return false;
         }
         $resp = $json->decode($http->resp_body);
@@ -272,6 +272,7 @@ class auth_sfauth extends auth_plain {
         }
 
         if($http->status < 200 || $http->status > 399) {
+            dbglog('err call' . print_r($http, true), 'sfauth');
             return false;
         }
 
