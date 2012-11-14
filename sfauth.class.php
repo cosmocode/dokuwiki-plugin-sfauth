@@ -86,12 +86,12 @@ class auth_sfauth extends auth_plain {
 
         if ($_GET['user'] && $_GET['sessionId']) {
             if ($this->oauth_finish_session($_GET['user'], $_GET['sessionId'], $_GET['instance'])) {
-                $this->prepareSalesForceSession();
-
-                if ($this->save_auth()) {
-                    msg('Authentication successful', 1);
-                    $user = $this->user;
-                    return true;
+                if ($this->prepareSalesForceSession()) {
+                    if ($this->save_auth()) {
+                        msg('Authentication successful', 1);
+                        $user = $this->user;
+                        return true;
+                    }
                 }
             }
             msg('Oops! something went wrong.', -1);
@@ -100,12 +100,13 @@ class auth_sfauth extends auth_plain {
 
         if ($_GET['code']) {
             if ($this->oauth_finish($_GET['code'])) {
-                $this->prepareSalesForceSession();
+                if ($this->prepareSalesForceSession()) {
 
-                if ($this->save_auth()) {
-                    msg('Authentication successful', 1);
-                    $user = $this->user;
-                    return true;
+                    if ($this->save_auth()) {
+                        msg('Authentication successful', 1);
+                        $user = $this->user;
+                        return true;
+                    }
                 }
             }
             msg('Oops! something went wrong.', -1);
@@ -117,10 +118,13 @@ class auth_sfauth extends auth_plain {
 
     private function prepareSalesForceSession() {
         $resp = $this->apicall('GET', '/chatter/users/me');
+        if (!$resp) return false;
         $id = $resp['id'];
         $this->user = $this->transformMailToId($resp['email']);
         $resp = $this->apicall('GET', '/sobjects/User/' . rawurlencode($id));
+        if (!$resp) return false;
         $this->parseUserData($resp);
+        return true;
     }
 
     public function oauth_finish($code){
@@ -252,8 +256,8 @@ class auth_sfauth extends auth_plain {
         }
 
         $http->sendRequest($url, $data, $method);
+        dbglog('call' . print_r($http, true), 'sfauth');
         if(!$http->resp_body) {
-            dbglog('failed call' . print_r($http, true), 'sfauth');
             return false;
         }
         $resp = $json->decode($http->resp_body);
@@ -268,7 +272,6 @@ class auth_sfauth extends auth_plain {
         }
 
         if($http->status < 200 || $http->status > 399) {
-            dbglog('failed call' . print_r($http, true), 'sfauth');
             return false;
         }
 
