@@ -86,12 +86,7 @@ class auth_sfauth extends auth_plain {
 
         if ($_GET['user'] && $_GET['sessionId']) {
             if ($this->oauth_finish_session($_GET['user'], $_GET['sessionId'], $_GET['instance'])) {
-                $resp = $this->apicall('GET', '/chatter/users/me');
-                $id = $resp['id'];
-                $user = $this->transformMailToId($resp['email']);
-                $this->user = $user;
-                $resp = $this->apicall('GET', '/sobjects/User/' . rawurlencode($id));
-                $this->parseUserData($resp);
+                $this->prepareSalesForceSession();
 
                 if ($this->save_auth()) {
                     msg('Authentication successful', 1);
@@ -104,23 +99,24 @@ class auth_sfauth extends auth_plain {
 
         if ($_GET['code']) {
             if ($this->oauth_finish($_GET['code'])) {
-                $resp = $this->apicall('GET', '/chatter/users/me');
-                $id = $resp['id'];
-                $user = $this->transformMailToId($resp['email']);
-                $this->user = $user;
-                $resp = $this->apicall('GET', '/sobjects/User/' . rawurlencode($id));
-                $this->parseUserData($resp);
+                $this->prepareSalesForceSession();
 
-                if ($this->save_auth()) {
-                    msg('Authentication successful', 1);
-                    return true;
-                }
+
             }
             msg('Oops! something went wrong.', -1);
             return false;
         }
         $this->oauth_start();
         return false;
+    }
+
+    private function prepareSalesForceSession() {
+        $resp = $this->apicall('GET', '/chatter/users/me');
+        $id = $resp['id'];
+        $user = $this->transformMailToId($resp['email']);
+        $this->user = $user;
+        $resp = $this->apicall('GET', '/sobjects/User/' . rawurlencode($id));
+        $this->parseUserData($resp);
     }
 
     public function oauth_finish($code){
@@ -158,7 +154,7 @@ class auth_sfauth extends auth_plain {
         );
 
         $this->user = $user;
-
+        dbglog('iframe login: ' . $user, 'sfauth');
         return true;
     }
 
@@ -252,7 +248,10 @@ class auth_sfauth extends auth_plain {
         }
 
         $http->sendRequest($url, $data, $method);
-        if(!$http->resp_body) return false;
+        if(!$http->resp_body) {
+            dbglog('failed call' . print_r($http, true), 'sfauth');
+            return false;
+        }
         $resp = $json->decode($http->resp_body);
 
         // session expired, request a new one and retry
@@ -264,7 +263,10 @@ class auth_sfauth extends auth_plain {
             }
         }
 
-        if($http->status < 200 || $http->status > 399) return false;
+        if($http->status < 200 || $http->status > 399) {
+            dbglog('failed call' . print_r($http, true), 'sfauth');
+            return false;
+        }
 
         return $resp;
     }
