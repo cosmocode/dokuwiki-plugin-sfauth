@@ -98,7 +98,7 @@ class auth_sfauth extends auth_plain {
                     return true;
                 }
             }
-            msg('Oops! something went wrong.1', -1);
+            msg('Oops! something went wrong.', -1);
             return false;
         }
 
