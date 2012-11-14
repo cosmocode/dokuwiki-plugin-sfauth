@@ -162,7 +162,6 @@ class auth_sfauth extends auth_plain {
         );
 
         $this->user = $user;
-        dbglog('iframe login: ' . $user, 'sfauth');
         return true;
     }
 
@@ -241,6 +240,7 @@ class auth_sfauth extends auth_plain {
         $url   = $this->auth['instance_url'].'/services/data/v24.0'.$endpoint;
 
         $http = new DokuHTTPClient();
+        $http->timeout = 30;
         $http->headers['Authorization'] = $this->auth['access_token'];
         $http->headers['Accept']        = 'application/json';
         $http->headers['X-PrettyPrint'] = '1';
