@@ -90,6 +90,7 @@ class auth_sfauth extends auth_plain {
 
                 if ($this->save_auth()) {
                     msg('Authentication successful', 1);
+                    $user = $this->user;
                     return true;
                 }
             }
@@ -101,7 +102,11 @@ class auth_sfauth extends auth_plain {
             if ($this->oauth_finish($_GET['code'])) {
                 $this->prepareSalesForceSession();
 
-
+                if ($this->save_auth()) {
+                    msg('Authentication successful', 1);
+                    $user = $this->user;
+                    return true;
+                }
             }
             msg('Oops! something went wrong.', -1);
             return false;
@@ -113,8 +118,7 @@ class auth_sfauth extends auth_plain {
     private function prepareSalesForceSession() {
         $resp = $this->apicall('GET', '/chatter/users/me');
         $id = $resp['id'];
-        $user = $this->transformMailToId($resp['email']);
-        $this->user = $user;
+        $this->user = $this->transformMailToId($resp['email']);
         $resp = $this->apicall('GET', '/sobjects/User/' . rawurlencode($id));
         $this->parseUserData($resp);
     }
