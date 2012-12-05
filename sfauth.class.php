@@ -5,7 +5,7 @@ require_once DOKU_INC . 'inc/auth/plain.class.php';
 class auth_sfauth extends auth_plain {
 
     private $authurl;
-    private $auth = null;
+    public  $auth = null;
     private $user = '';
 
     private $salesForceUsers = array();
@@ -254,7 +254,6 @@ class auth_sfauth extends auth_plain {
             }
             // else default to standard POST encoding
         }
-
         $http->sendRequest($url, $data, $method);
         if(!$http->resp_body) {
             dbglog('err call' . print_r($http, true), 'sfauth');
@@ -293,5 +292,9 @@ class auth_sfauth extends auth_plain {
         }else{
             return false;
         }
+    }
+
+    public function isAuthenticated() {
+        return !is_null($this->auth);
     }
 }
