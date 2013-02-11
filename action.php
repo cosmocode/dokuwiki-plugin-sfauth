@@ -36,9 +36,11 @@ class action_plugin_sfauth extends DokuWiki_Action_Plugin {
     }
 
     private function displayLogin($linkToLoginForm = false) {
+        global $ID;
         echo '<div class="sfauth">';
+
         printf('<a href="%s" class="sf">%s</a>',
-            hsc('?do=login&u=a'), hsc($this->getLang('login link')));
+            wl($ID, array('do' => 'login', 'u' => 'a')), hsc($this->getLang('login link')));
         if ($linkToLoginForm) {
             printf('<br/>');
             printf('<a href="?do=login">%s</a>', hsc($this->getLang('normal login')));
@@ -60,8 +62,12 @@ class action_plugin_sfauth extends DokuWiki_Action_Plugin {
         if (!isset($_GET['code'])) {
             return;
         }
-
-        send_redirect(wl($ID, '', true, '&'));
+        $id = $ID;
+        if (isset($_SESSION['sfauth_redirect'])) {
+            $id = $_SESSION['sfauth_redirect'];
+            unset($_SESSION['sfauth_redirect']);
+        }
+        send_redirect(wl($id, '', true, '&'));
     }
 }
 

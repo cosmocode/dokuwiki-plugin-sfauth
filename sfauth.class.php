@@ -129,6 +129,8 @@ class auth_sfauth extends auth_plain {
 
     public function oauth_finish($code){
         global $conf;
+
+
         $data = array(
             'code'       => $code,
             'grant_type' => 'authorization_code',
@@ -174,6 +176,9 @@ class auth_sfauth extends auth_plain {
      */
     public function oauth_start(){
         global $conf;
+
+        if (isset($_REQUEST['id'])) $_SESSION['sfauth_redirect'] = $_REQUEST['id'];
+
         $data = array(
             'response_type' => 'code',
             'client_id'     => $conf['plugin']['sfauth']['consumer key'],
