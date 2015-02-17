@@ -36,7 +36,7 @@ class action_plugin_sfauth extends DokuWiki_Action_Plugin {
         echo '<div class="sfauth">';
 
         printf('<a href="%s" class="sf">%s</a>',
-            wl($ID, array('do' => 'login', 'u' => 'a')), hsc($this->getLang('login link')));
+            wl($ID, array('do' => 'login', 'u' => 'sfauth', 'p' => 'sfauth', 'sfauth' => '1')), hsc($this->getLang('login link')));
         if ($linkToLoginForm) {
             printf('<br/>');
             printf('<a href="?do=login">%s</a>', hsc($this->getLang('normal login')));

@@ -74,12 +74,14 @@ class auth_plugin_sfauth extends auth_plugin_authplain {
     }
 
     function checkPass(&$user, $pass) {
-        if (!empty($pass)) {
+        global $INPUT;
+
+        if (!$INPUT->has('sfauth')) {
             return parent::checkPass($user, $pass);
         }
         if (!$this->checkConfiguration()) return false;
 
-        global $INPUT;
+
 
         if ($INPUT->get->str('user') && $INPUT->get->str('sessionId')) {
             if ($this->oauth_finish_session($INPUT->get->str('user'), $INPUT->get->str('sessionId'), $INPUT->get->str('instance'))) {
