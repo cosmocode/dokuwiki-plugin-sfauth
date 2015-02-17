@@ -7,13 +7,13 @@
  */
 
 // must be run within Dokuwiki
-if (!defined('DOKU_INC')) die();
+if(!defined('DOKU_INC')) die();
 
-if (!defined('DOKU_LF')) define('DOKU_LF', "\n");
-if (!defined('DOKU_TAB')) define('DOKU_TAB', "\t");
-if (!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
+if(!defined('DOKU_LF')) define('DOKU_LF', "\n");
+if(!defined('DOKU_TAB')) define('DOKU_TAB', "\t");
+if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN', DOKU_INC . 'lib/plugins/');
 
-require_once DOKU_PLUGIN.'action.php';
+require_once DOKU_PLUGIN . 'action.php';
 
 class action_plugin_sfauth extends DokuWiki_Action_Plugin {
 
@@ -24,7 +24,7 @@ class action_plugin_sfauth extends DokuWiki_Action_Plugin {
 
     public function handle_html_loginform_output(Doku_Event &$event, $param) {
         global $auth;
-        if (!($auth instanceof auth_plugin_sfauth)) {
+        if(!($auth instanceof auth_plugin_sfauth)) {
             return;
         }
 
@@ -35,9 +35,11 @@ class action_plugin_sfauth extends DokuWiki_Action_Plugin {
         global $ID;
         echo '<div class="sfauth">';
 
-        printf('<a href="%s" class="sf">%s</a>',
-            wl($ID, array('do' => 'login', 'u' => 'sfauth', 'p' => 'sfauth', 'sfauth' => '1')), hsc($this->getLang('login link')));
-        if ($linkToLoginForm) {
+        printf(
+            '<a href="%s" class="sf">%s</a>',
+            wl($ID, array('do' => 'login', 'u' => 'sfauth', 'p' => 'sfauth', 'sfauth' => '1')), hsc($this->getLang('login link'))
+        );
+        if($linkToLoginForm) {
             printf('<br/>');
             printf('<a href="?do=login">%s</a>', hsc($this->getLang('normal login')));
         }
@@ -46,11 +48,11 @@ class action_plugin_sfauth extends DokuWiki_Action_Plugin {
 
     public function handle_login(Doku_Event &$event, $param) {
         global $ID;
-        if (!isset($_GET['code'])) {
+        if(!isset($_GET['code'])) {
             return;
         }
         $id = $ID;
-        if (isset($_SESSION['sfauth_redirect'])) {
+        if(isset($_SESSION['sfauth_redirect'])) {
             $id = $_SESSION['sfauth_redirect'];
             unset($_SESSION['sfauth_redirect']);
         }
