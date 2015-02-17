@@ -20,10 +20,6 @@ class action_plugin_sfauth extends DokuWiki_Action_Plugin {
     public function register(Doku_Event_Handler &$controller) {
         $controller->register_hook('HTML_LOGINFORM_OUTPUT', 'AFTER', $this, 'handle_html_loginform_output');
         $controller->register_hook('ACTION_HEADERS_SEND', 'AFTER', $this, 'handle_login');
-
-        if ($this->getConf('show login')) {
-            $controller->register_hook('TPL_CONTENT_DISPLAY', 'AFTER', $this, 'append_to_content');
-        }
     }
 
     public function handle_html_loginform_output(Doku_Event &$event, $param) {
@@ -46,15 +42,6 @@ class action_plugin_sfauth extends DokuWiki_Action_Plugin {
             printf('<a href="?do=login">%s</a>', hsc($this->getLang('normal login')));
         }
         echo '</div>';
-    }
-
-    public function append_to_content(Doku_Event &$event, $param) {
-        global $ACT;
-        if ($ACT != 'denied' || $_SERVER['REMOTE_USER']) {
-            return;
-        }
-
-        $this->displayLogin(true);
     }
 
     public function handle_login(Doku_Event &$event, $param) {
