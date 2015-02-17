@@ -1,7 +1,7 @@
 base   sfauth
 author Dominik Eckelmann, Andreas Gohr
 email  dokuwiki@cosmocode.de
-date   2013-02-11
+date   2015-02-17
 name   sfauth plugin
 desc   Allow SalesForce auth besides auth plain.
 url    http://www.dokuwiki.org/plugin:sfauth

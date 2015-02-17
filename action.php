@@ -28,7 +28,7 @@ class action_plugin_sfauth extends DokuWiki_Action_Plugin {
 
     public function handle_html_loginform_output(Doku_Event &$event, $param) {
         global $auth;
-        if (!($auth instanceof auth_sfauth)) {
+        if (!($auth instanceof auth_plugin_sfauth)) {
             return;
         }
 

@@ -1,8 +1,6 @@
 <?php
 
-require_once DOKU_INC . 'inc/auth/plain.class.php';
-
-class auth_sfauth extends auth_plain {
+class auth_plugin_sfauth extends auth_plugin_authplain {
 
     private $authurl;
     public  $auth = null;
@@ -11,16 +9,16 @@ class auth_sfauth extends auth_plain {
     private $salesForceUsers = array();
 
     public function __construct() {
-        parent::auth_plain();
-        $this->authurl = DOKU_URL.'doku.php?do=login&u=a';
+        parent::__construct();
+
+        $this->authurl = DOKU_URL.DOKU_SCRIPT.'?do=login&u=a';
         $this->user = '';
     }
 
     private function isSfConfigured() {
-        global $conf;
-        if (empty($conf['plugin']['sfauth']['consumer key'])) return false;
-        if (empty($conf['plugin']['sfauth']['consumer secret'])) return false;
-        if (empty($conf['plugin']['sfauth']['auth url'])) return false;
+        if (!$this->getConf('consumer key')) return false;
+        if (!$this->getConf('consumer secret')) return false;
+        if (!$this->getConf('auth url')) return false;
         return true;
     }
 
@@ -43,11 +41,9 @@ class auth_sfauth extends auth_plain {
         if ($data) return $data;
 
         if (!$this->checkConfiguration()) return false;
-
         if (array_key_exists($user, $this->salesForceUsers)) {
             return $this->salesForceUsers[$user];
         }
-
         return false;
     }
 
@@ -66,9 +62,8 @@ class auth_sfauth extends auth_plain {
         if (!strpos($mail, '@')) {
             return $mail;
         }
-        global $conf;
-        $ownerDomain = $conf['plugin']['sfauth']['owner domain'];
 
+        $ownerDomain = $this->getConf('owner domain');
         if (empty($ownerDomain)) {
             return $mail;
         }
@@ -84,8 +79,10 @@ class auth_sfauth extends auth_plain {
         }
         if (!$this->checkConfiguration()) return false;
 
-        if ($_GET['user'] && $_GET['sessionId']) {
-            if ($this->oauth_finish_session($_GET['user'], $_GET['sessionId'], $_GET['instance'])) {
+        global $INPUT;
+
+        if ($INPUT->get->str('user') && $INPUT->get->str('sessionId')) {
+            if ($this->oauth_finish_session($INPUT->get->str('user'), $INPUT->get->str('sessionId'), $INPUT->get->str('instance'))) {
                 if ($this->prepareSalesForceSession()) {
                     if ($this->save_auth()) {
                         msg('Authentication successful', 1);
@@ -98,8 +95,8 @@ class auth_sfauth extends auth_plain {
             return false;
         }
 
-        if ($_GET['code']) {
-            if ($this->oauth_finish($_GET['code'])) {
+        if ($INPUT->get->str('code')) {
+            if ($this->oauth_finish($INPUT->get->str('code'))) {
                 if ($this->prepareSalesForceSession()) {
 
                     if ($this->save_auth()) {
@@ -139,7 +136,7 @@ class auth_sfauth extends auth_plain {
             'redirect_uri'  => $this->authurl
         );
 
-        $url = $conf['plugin']['sfauth']['auth url'] . '/services/oauth2/token';
+        $url = $this->getConf('auth url') . '/services/oauth2/token';
 
         $http = new DokuHTTPClient();
         $http->headers['Accept'] = 'application/json';
@@ -186,7 +183,7 @@ class auth_sfauth extends auth_plain {
             'display'       => 'page', // may popup
         );
 
-        $url = $conf['plugin']['sfauth']['auth url'].'/services/oauth2/authorize?'.buildURLparams($data, '&');
+        $url = $this->getConf('auth url').'/services/oauth2/authorize?'.buildURLparams($data, '&');
         send_redirect($url);
     }
 
@@ -205,7 +202,6 @@ class auth_sfauth extends auth_plain {
      * request a new auth key
      */
     public function oauth_refresh(){
-        global $conf;
         if(!$this->load_auth()) return false;
         if (!isset($this->auth['refresh_token'])) {
             return false;
@@ -213,11 +209,11 @@ class auth_sfauth extends auth_plain {
         $data = array(
             'grant_type'    => 'refresh_token',
             'refresh_token' => $this->auth['refresh_token'],
-            'client_id'     => $conf['plugin']['sfauth']['consumer key'],
-            'client_secret' => $conf['plugin']['sfauth']['consumer secret']
+            'client_id'     => $this->getConf('consumer key'),
+            'client_secret' => $this->getConf('consumer secret')
         );
 
-        $url = $conf['plugin']['sfauth']['auth url'].'/services/oauth2/token?'.buildURLparams($data, '&');
+        $url = $this->getConf('auth url').'/services/oauth2/token?'.buildURLparams($data, '&');
         $http = new DokuHTTPClient();
         $http->headers['Accept'] = 'application/json';
         $resp = $http->post($url,array());
@@ -226,8 +222,6 @@ class auth_sfauth extends auth_plain {
 
         $resp = $json->decode($resp);
         $this->auth = $resp;
-
-
 
         return $this->save_auth();
     }
