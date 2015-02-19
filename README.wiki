@@ -13,7 +13,7 @@ To install this plug-in you have to do the following steps in the given order:
   - Login
   - Click on your name in the top toolbar
   - Click on ''Setup''
-  - Click on ''Create'' under App Setup in the left hand navigation
+  - Click on ''Create'' under ''App Setup'' in the left hand navigation
   - Click on ''Apps''
   - Under "Connected Apps" click the ''New'' button
   - Fill Form
@@ -30,22 +30,29 @@ To install this plug-in you have to do the following steps in the given order:
   - Configure the plugin in the configuration manager using the data given
 
 === Add custom profile Field ===
+
   - Login
   - Click on your name in the top toolbar
   - Click on ''Setup''
-  - Click on ''Customize'' in the ''App Setup'' section
+  - Click on ''Customize'' under ''App Setup'' in the left hand navigation
   - Click on ''Users''
   - Click on ''Fields''
   - Click on ''new'' in the ''User Custom Fields'' section (page bottom)
     - Step 1:
       * Picklist (Multi-Select)
     - Step 2:
-      * Fill out form
+      * Field Label: DokuWiki Groups
+      * Values: enter the groups you want to assign to users
+      * Visible Lines: whatever you like
       * Field Name: DokuWiki_Groups
     - Step 3:
-      * Choose editor, may grand the user read only access.
+      * keep defaults
     - Step 4:
+      * keep defaults
       * Save
+
+You now can add Groups to your users that will be picked up by DokuWiki. DokuWiki will add the default group (configured in Dokuwiki)
+and the instance name (salesforce1, salesforce2, salesforce3) to theses groups automatically.
 
 ==== DokuWiki Setup ====
   - copy the lib/plugins/sfauth/sfauth.class.php to inc/auth/sfauth.class.php

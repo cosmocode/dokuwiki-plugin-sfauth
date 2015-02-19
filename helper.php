@@ -288,6 +288,7 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
      * @return bool
      */
     protected function loadUserDataFromSalesForce() {
+        global $conf;
         $id = preg_replace('/^.*\//', '', $this->authdata['id']);
 
         $resp = $this->apicall('GET', '/sobjects/User/' . rawurlencode($id));
@@ -299,6 +300,14 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
             'grps' => explode(';', $resp['DokuWiki_Groups__c']),
             'sfid' => $resp['Id']
         );
+
+        // add instance as group and default group
+        $this->userdata['grps'][] = 'salesforce'.$this->instance;
+        $this->userdata['grps'][] = $conf['defaultgroup'];
+
+        $this->userdata['grps'] = array_unique($this->userdata['grps']);
+        $this->userdata['grps'] = array_filter($this->userdata['grps']);
+
         $this->user = $this->transformMailToId($this->userdata['mail']);
         return true;
     }
