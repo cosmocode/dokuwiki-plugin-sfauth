@@ -54,9 +54,6 @@ To install this plug-in you have to do the following steps in the given order:
 You now can add Groups to your users that will be picked up by DokuWiki. DokuWiki will add the default group (configured in Dokuwiki)
 and the instance name (salesforce1, salesforce2, salesforce3) to theses groups automatically.
 
-==== DokuWiki Setup ====
-  - copy the lib/plugins/sfauth/sfauth.class.php to inc/auth/sfauth.class.php
-  - change the authtype config to sfauth.
 
 ==== Owners domain ====
 As username the plug-in will use the e-mail address provided by sales force.
@@ -65,12 +62,14 @@ nice names. To provide a unique username this feature is limited to one host.
 Just set the //owners domain// option to your domain. I.e.: example.com.
 
 ===== Use the wiki in a web tab =====
+
 Just create the web tab:
-  - Click on your name int the top toolbar
+
+  - Click on your name in the top toolbar
   - Click on ''Setup''
   - Click on App Setup -> Create -> Tabs
   - Create a new web tab
     - fill out the forms important field is: ''Button or Link URL''
-
+      * You need to fill in what you configured for the callback URL above, but add ''&sessionId={!API_Session_ID}&instance={!API_Enterprise_Server_URL_240}&user={!User_ID}'' to it. Eg. ''http://example.com/dokuwiki/doku.php?do=login&u=sf&p=sf&sf=1&sessionId={!API_Session_ID}&instance={!API_Enterprise_Server_URL_240}&user={!User_ID}''
 URL for ''Link URL''
   https://your.wiki/path/doku.php?do=login&u=a&sessionId={!API_Session_ID}&instance={!API_Enterprise_Server_URL_240}&user={!User_ID}

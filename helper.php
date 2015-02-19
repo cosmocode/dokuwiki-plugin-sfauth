@@ -108,7 +108,6 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
         if($INPUT->get->str('code')) {
             if($this->oauth_finish($INPUT->get->str('code'), $instance)) {
                 if($this->loadUserDataFromSalesForce()) {
-
                     if($this->saveToFile()) {
                         msg('Authentication successful', 1);
                         return true;
@@ -274,11 +273,10 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
     protected function oauth_directlogin($user, $sessionId, $instanceurl) {
         $url        = parse_url($instanceurl);
         $this->authdata = array(
+            'id' => $user,
             'instance_url' => sprintf('%s://%s', $url['scheme'], $url['host']),
             'access_token' => 'Bearer ' . $sessionId
         );
-
-        $this->user = $user;
         return true;
     }
 
