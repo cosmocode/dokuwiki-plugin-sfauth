@@ -31,17 +31,20 @@ class action_plugin_sfauth extends DokuWiki_Action_Plugin {
         $this->displayLogin();
     }
 
-    private function displayLogin($linkToLoginForm = false) {
+    /**
+     * Displays the Salesforce Login Button
+     *
+     * Note: We always use the main instance to start the oauth workflow because it doesn't matter. Salesforce
+     * will use the redirect URI configured in the instance of the user that logged in and that will contain the
+     * correct instance number for all subsequent API calls. this way we only need one login button
+     */
+    protected function displayLogin() {
         global $ID;
         echo '<div class="sfauth">';
-
-        printf(
-            '<a href="%s" class="sf">%s</a>',
-            wl($ID, array('do' => 'login', 'u' => 'sf', 'p' => 'sf', 'sf' => '1')), hsc($this->getLang('login link'))
-        );
-        if($linkToLoginForm) {
-            printf('<br/>');
-            printf('<a href="?do=login">%s</a>', hsc($this->getLang('normal login')));
+        if($this->getConf('consumer key')) {
+            echo '<a href="'.wl($ID, array('do' => 'login', 'u' => 'sf', 'p' => 'sf', 'sf' => '1')).'" class="sf">';
+            echo $this->getLang('login');
+            echo '</a> ';
         }
         echo '</div>';
     }

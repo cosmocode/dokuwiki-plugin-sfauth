@@ -13,11 +13,20 @@ To install this plug-in you have to do the following steps in the given order:
   - Login
   - Click on your name in the top toolbar
   - Click on ''Setup''
-  - Choose ''Develop'' from the left hand navigation
-  - Click ''Remote Access''
-  - Click ''New''
+  - Click on ''Create'' under App Setup in the left hand navigation
+  - Click on ''Apps''
+  - Under "Connected Apps" click the ''New'' button
   - Fill Form
-    * use the https://example.com/dokuwiki/doku.php?do=login&u=a as callback url
+    * Connected App Name: DokuWiki
+    * API Name: DokuWiki
+    * Contact Email: your email address
+    * API -> Enable OAuth Settings
+      * Callback URL - see DokuWiki's config manager. Should be something like ''http://example.com/dokuwiki/doku.php?do=login&u=sf&p=sf&sf=1''
+      * Don't enable digital signatures!
+      * Select the following oAuth scopes:
+        * Access and manage your data (api)
+        * Access your basic information (id, profile, email, address, phone)
+        * Perform requests on your behalf at any time (refresh_token, offline_access)
   - Configure the plugin in the configuration manager using the data given
 
 === Add custom profile Field ===

@@ -1,3 +1,3 @@
 <?php
-$lang['login link']   = 'Login with SalesForce';
-$lang['normal login'] = 'Or use normal login';
+
+$lang['login']   = 'Login with Salesforce';

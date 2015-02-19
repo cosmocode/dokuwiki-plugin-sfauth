@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Class helper_plugin_sfauth
+ *
+ * Represents a single oAuth authenticated SalesForce User
+ */
 class helper_plugin_sfauth extends DokuWiki_Plugin {
 
     /** @var string current user to authenticate */
@@ -10,6 +15,9 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
 
     /** @var array authentication data for above user */
     protected $authdata = null;
+
+    /** @var int salesforce instance to use */
+    protected $instance = 1;
 
     /**
      * Each Instantiated plugin is it's own user
@@ -25,10 +33,13 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
      *
      * This is the URL that has to be configured in Salesforce
      *
+     * @param int $instance the salesforce configuration instance to use (1 to 3)
      * @return string
      */
-    public static function getLoginURL() {
-        return DOKU_URL . DOKU_SCRIPT . '?do=login&u=sf&p=sf&sf=1';
+    public static function getLoginURL($instance) {
+        $instance = (int) $instance;
+        if($instance < 1 || $instance > 3) $instance = 1;
+        return DOKU_URL . DOKU_SCRIPT . '?do=login&u=sf&p=sf&sf='.$instance;
     }
 
     /**
@@ -70,10 +81,14 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
     /**
      * Initialize the user by starting an oAuth flow
      *
+     * @param int $instance Salesforce config instance
      * @return bool true if the oAuth flow has completed successfully, false on error
      */
-    public function init_by_oauth() {
+    public function init_by_oauth($instance) {
         global $INPUT;
+        $instance = (int) $instance;
+        if($instance < 1 || $instance > 3) $instance = 1;
+        $this->instance = $instance;
 
         // login directly from Saleforce
         if($INPUT->get->str('user') && $INPUT->get->str('sessionId')) {
@@ -91,7 +106,7 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
 
         // oAuth step 2: request auth token
         if($INPUT->get->str('code')) {
-            if($this->oauth_finish($INPUT->get->str('code'))) {
+            if($this->oauth_finish($INPUT->get->str('code'), $instance)) {
                 if($this->loadUserDataFromSalesForce()) {
 
                     if($this->saveToFile()) {
@@ -105,7 +120,7 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
         }
 
         // oAuth step 1: redirect to salesforce
-        $this->oauth_start();
+        $this->oauth_start($this->instance);
         return false; // will not be reached
     }
 
@@ -163,15 +178,18 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
      * by redirecting the user to the login site
      * @link http://bit.ly/y7WOmy
      */
-    protected function oauth_start() {
+    protected function oauth_start($instance) {
         global $ID;
+        $instance = (int) $instance;
+        if($instance < 1 || $instance > 3) $instance = 1;
+        $this->instance = $instance;
 
         $_SESSION['sfauth_redirect'] = $ID; // where wanna go later
 
         $data = array(
             'response_type' => 'code',
             'client_id'     => $this->getConf('consumer key'),
-            'redirect_uri'  => self::getLoginURL(),
+            'redirect_uri'  => self::getLoginURL($this->instance),
             'display'       => 'page', // may popup
         );
 
@@ -183,18 +201,23 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
      * Request an authentication code with the given request token
      *
      * @param string $code request token
+     * @param int $instance Salesforce instance to authenticate with
      * @return bool
      */
-    protected function oauth_finish($code) {
+    protected function oauth_finish($code, $instance) {
+        $instance = (int) $instance;
+        if($instance < 1 || $instance > 3) $instance = 1;
+        $this->instance = $instance;
+
         /*
          * request the authdata with the code
          */
         $data = array(
             'code'          => $code,
             'grant_type'    => 'authorization_code',
-            'client_id'     => $this->getConf('consumer key'),
-            'client_secret' => $this->getConf('consumer secret'),
-            'redirect_uri'  => self::getLoginURL()
+            'client_id'     => $this->getIConf('consumer key', $this->instance),
+            'client_secret' => $this->getIConf('consumer secret', $this->instance),
+            'redirect_uri'  => self::getLoginURL($this->instance)
         );
 
         $url = $this->getConf('auth url') . '/services/oauth2/token';
@@ -223,8 +246,8 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
         $data = array(
             'grant_type'    => 'refresh_token',
             'refresh_token' => $this->authdata['refresh_token'],
-            'client_id'     => $this->getConf('consumer key'),
-            'client_secret' => $this->getConf('consumer secret')
+            'client_id'     => $this->getIConf('consumer key', $this->instance),
+            'client_secret' => $this->getIConf('consumer secret', $this->instance)
         );
 
         $url                     = $this->getConf('auth url') . '/services/oauth2/token?' . buildURLparams($data, '&');
@@ -245,11 +268,11 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
      *
      * @param string $user
      * @param string $sessionId
-     * @param string $instance
+     * @param string $instanceurl
      * @return bool
      */
-    protected function oauth_directlogin($user, $sessionId, $instance) {
-        $url        = parse_url($instance);
+    protected function oauth_directlogin($user, $sessionId, $instanceurl) {
+        $url        = parse_url($instanceurl);
         $this->authdata = array(
             'instance_url' => sprintf('%s://%s', $url['scheme'], $url['host']),
             'access_token' => 'Bearer ' . $sessionId
@@ -309,7 +332,7 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
      * @return bool
      * @throws Exception
      */
-    function loadFromFile($user) {
+    protected function loadFromFile($user) {
         $userdata = getCacheName($user,'.sfuser');
         $authdata = getCacheName($user,'.sfauth');
 
@@ -321,6 +344,7 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
 
         if(file_exists($authdata)) {
             $this->authdata = unserialize(io_readFile($authdata, false));
+            $this->instance = $this->authdata['dokuwiki-instance'];
         } else {
             throw new Exception('No such user');
         }
@@ -335,8 +359,10 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
      * @throws Exception
      * @return bool
      */
-    function saveToFile() {
+    protected function saveToFile() {
         if(!$this->user) throw new Exception('No user info to save');
+
+        $this->authdata['dokuwiki-instance'] = $this->instance;
 
         $userdata = getCacheName($this->user,'.sfuser');
         $authdata = getCacheName($this->user,'.sfauth');
@@ -346,5 +372,21 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
         return $ok1 && $ok2;
     }
 
+    /**
+     * Get a config setting for the specified instance
+     *
+     * @param $config
+     * @param $instance
+     * @return mixed
+     */
+    protected function getIConf($config, $instance) {
+        if($instance === 2 || $instance === 3) {
+            $postfix = ' '.$instance;
+        } else {
+            $postfix = '';
+        }
+
+        return $this->getConf($config.$postfix);
+    }
 
 }

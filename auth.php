@@ -44,7 +44,7 @@ class auth_plugin_sfauth extends auth_plugin_authplain {
 
         /** @var helper_plugin_sfauth $sfuser */
         $sfuser = plugin_load('helper', 'sfauth');
-        if($sfuser->init_by_oauth()) {
+        if($sfuser->init_by_oauth($INPUT->int('sf', 1))) {
             $user = $sfuser->getUser();
             return true;
         }
