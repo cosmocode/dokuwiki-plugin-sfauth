@@ -19,7 +19,7 @@ class action_plugin_sfauth extends DokuWiki_Action_Plugin {
 
     public function register(Doku_Event_Handler &$controller) {
         $controller->register_hook('HTML_LOGINFORM_OUTPUT', 'AFTER', $this, 'handle_html_loginform_output');
-        $controller->register_hook('ACTION_HEADERS_SEND', 'AFTER', $this, 'handle_login');
+        $controller->register_hook('AUTH_LOGIN_CHECK', 'AFTER', $this, 'handle_login');
     }
 
     public function handle_html_loginform_output(Doku_Event &$event, $param) {
@@ -49,19 +49,18 @@ class action_plugin_sfauth extends DokuWiki_Action_Plugin {
         echo '</div>';
     }
 
+    /**
+     * Redirect to the page that initially started the auth process
+     *
+     * @param Doku_Event $event
+     * @param $param
+     */
     public function handle_login(Doku_Event &$event, $param) {
-        /*
-        global $ID;
-        if(!isset($_GET['code'])) {
-            return;
+        if($_SERVER['REMOTE_USER'] && isset($_SESSION['sfauth_id'])) {
+            $id = $_SESSION['sfauth_id'];
+            unset($_SESSION['sfauth_id']);
+            send_redirect(wl($id, '', true, '&'));
         }
-        $id = $ID;
-        if(isset($_SESSION['sfauth_redirect'])) {
-            $id = $_SESSION['sfauth_redirect'];
-            unset($_SESSION['sfauth_redirect']);
-        }
-        send_redirect(wl($id, '', true, '&'));
-        */
     }
 }
 

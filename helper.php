@@ -86,6 +86,7 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
      */
     public function init_by_oauth($instance) {
         global $INPUT;
+        global $ID;
         $instance = (int) $instance;
         if($instance < 1 || $instance > 3) $instance = 1;
         $this->instance = $instance;
@@ -117,6 +118,9 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
             msg('Oops! something went wrong.', -1);
             return false;
         }
+
+        // remember the page start started the login
+        $_SESSION['sfauth_id'] = getID();
 
         // oAuth step 1: redirect to salesforce
         $this->oauth_start($this->instance);
