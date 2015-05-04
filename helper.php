@@ -96,6 +96,8 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
             if($this->oauth_directlogin($INPUT->get->str('user'), $INPUT->get->str('sessionId'), $INPUT->get->str('instance'))) {
                 if($this->loadUserDataFromSalesForce()) {
                     if($this->saveToFile()) {
+                        $log = array('message' => 'logged in via Salesforce', 'user' => $this->user);
+                        trigger_event('PLUGIN_LOGLOG_LOG',$log);
                         msg('Authentication successful', 1);
                         return true;
                     }
@@ -110,6 +112,8 @@ class helper_plugin_sfauth extends DokuWiki_Plugin {
             if($this->oauth_finish($INPUT->get->str('code'), $instance)) {
                 if($this->loadUserDataFromSalesForce()) {
                     if($this->saveToFile()) {
+                        $log = array('message' => 'logged in via Salesforce', 'user' => $this->user);
+                        trigger_event('PLUGIN_LOGLOG_LOG',$log);
                         msg('Authentication successful', 1);
                         return true;
                     }
